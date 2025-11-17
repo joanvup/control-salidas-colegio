@@ -14,3 +14,4 @@ class Config:
     TEMP_FOLDER = os.path.join(basedir, 'temp')
      # Tiempo mínimo en minutos entre registros de salida para el mismo estudiante
     EXIT_LOG_COOLDOWN_MINUTES = 60
+    MAX_CONTENT_LENGTH = 50 * 1024 * 1024
