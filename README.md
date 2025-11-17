@@ -1,14 +1,10 @@
-¡Por supuesto! Un buen `README.md` es la puerta de entrada a tu proyecto. Es esencial que sea claro, conciso y que guíe a cualquier persona (incluido tu yo del futuro) sobre cómo configurar y ejecutar la aplicación.
-
-Aquí tienes un archivo `README.md` completo y profesional, escrito en Markdown. Simplemente crea un archivo llamado `README.md` en la raíz de tu proyecto y pega este contenido.
-
 ---
 
 # Control de Salidas Peatonales - Colegio
 
 Aplicación web y móvil (PWA) para la gestión y control de salidas peatonales de estudiantes en un entorno escolar. El sistema permite registrar estudiantes, generar carnets con códigos QR y validar las salidas en tiempo real utilizando la cámara de un dispositivo.
 
-![Diseño del Carnet](app/static/img/carnet_background.png) <!-- Asegúrate de que esta ruta sea correcta o reemplázala con una captura de pantalla de la app -->
+![Dashboard](app/static/img/dashboard.png) <!-- Asegúrate de que esta ruta sea correcta o reemplázala con una captura de pantalla de la app -->
 
 ---
 
@@ -68,7 +64,7 @@ Sigue estos pasos para poner en marcha el proyecto en tu entorno de desarrollo.
 ### 1. Clonar el Repositorio
 
 ```bash
-git clone <URL_DEL_REPOSITORIO_EN_GITHUB>
+git clone https://github.com/joanvup/control-salidas-colegio.git
 cd control-salidas-colegio
 ```
 
