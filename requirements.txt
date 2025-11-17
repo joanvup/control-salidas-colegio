@@ -1,0 +1,16 @@
+Flask
+Flask-SQLAlchemy
+Flask-Migrate
+Flask-WTF
+Flask-Login
+python-dotenv
+Werkzeug
+email-validator
+Pillow
+openpyxl
+qrcode
+reportlab
+pytz
+cryptography
+PyMySQL
+gunicorn

@@ -1,0 +1,38 @@
+{% extends "layouts/base.html" %}
+
+{% block content %}
+<div class="bg-white p-6 md:p-8 rounded-lg shadow-md max-w-2xl mx-auto">
+    <h1 class="text-2xl font-bold mb-4">{{ title }}</h1>
+    
+    <div class="mb-6 p-4 bg-blue-50 border border-blue-200 rounded-md">
+        <h2 class="font-semibold text-blue-800">Instrucciones</h2>
+        <ol class="list-decimal list-inside text-sm text-blue-700 mt-2 space-y-1">
+            <li>Descargue la plantilla de Excel para asegurarse de que el formato es correcto.</li>
+            <li>Llene el archivo con los datos de los estudiantes. La columna "id" debe ser única.</li>
+            <li>Guarde el archivo y súbalo usando el formulario a continuación.</li>
+            <li>El sistema validará los datos y añadirá solo los estudiantes nuevos.</li>
+        </ol>
+        <div class="mt-4">
+            <a href="{{ url_for('management.download_template') }}" class="text-indigo-600 hover:text-indigo-800 font-medium">
+                → Descargar Plantilla de Ejemplo
+            </a>
+        </div>
+    </div>
+
+    <form method="POST" enctype="multipart/form-data" novalidate>
+        {{ form.hidden_tag() }}
+        <div>
+            {{ form.excel_file.label(class="block text-sm font-medium text-gray-700 mb-1") }}
+            {{ form.excel_file(class="block w-full text-sm text-gray-900 border border-gray-300 rounded-lg cursor-pointer bg-gray-50 focus:outline-none") }}
+            {% for error in form.excel_file.errors %}
+            <p class="text-red-500 text-xs mt-1">{{ error }}</p>
+            {% endfor %}
+        </div>
+        
+        <div class="mt-6 flex items-center justify-end space-x-4">
+            <a href="{{ url_for('management.list_students') }}" class="bg-gray-200 text-gray-800 px-4 py-2 rounded-md hover:bg-gray-300">Cancelar</a>
+            {{ form.submit(class="bg-slate-800 text-white px-4 py-2 rounded-md hover:bg-slate-900 cursor-pointer") }}
+        </div>
+    </form>
+</div>
+{% endblock %}

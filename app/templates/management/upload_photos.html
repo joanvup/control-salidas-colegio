@@ -1,0 +1,34 @@
+{% extends "layouts/base.html" %}
+
+{% block content %}
+<div class="bg-white p-6 md:p-8 rounded-lg shadow-md max-w-2xl mx-auto">
+    <h1 class="text-2xl font-bold mb-4">{{ title }}</h1>
+
+    <div class="mb-6 p-4 bg-blue-50 border border-blue-200 rounded-md">
+        <h2 class="font-semibold text-blue-800">Instrucciones</h2>
+        <ol class="list-decimal list-inside text-sm text-blue-700 mt-2 space-y-1">
+            <li>Crea una carpeta en tu computador.</li>
+            <li>Coloca dentro las fotos de los estudiantes en formato <strong>JPG, JPEG o PNG</strong>.</li>
+            <li>El nombre de cada archivo de foto <strong>debe ser exactamente el ID del estudiante</strong>. Ejemplo: <code>1001.jpg</code>.</li>
+            <li>Comprime la carpeta en un único archivo <strong>.zip</strong>.</li>
+            <li>Sube ese archivo .zip a continuación. El sistema actualizará las fotos correspondientes.</li>
+        </ol>
+    </div>
+
+    <form method="POST" enctype="multipart/form-data" novalidate>
+        {{ form.hidden_tag() }}
+        <div>
+            {{ form.zip_file.label(class="block text-sm font-medium text-gray-700 mb-1") }}
+            {{ form.zip_file(class="block w-full text-sm text-gray-900 border border-gray-300 rounded-lg cursor-pointer bg-gray-50 focus:outline-none") }}
+            {% for error in form.zip_file.errors %}
+            <p class="text-red-500 text-xs mt-1">{{ error }}</p>
+            {% endfor %}
+        </div>
+        
+        <div class="mt-6 flex items-center justify-end space-x-4">
+            <a href="{{ url_for('management.list_students') }}" class="bg-gray-200 text-gray-800 px-4 py-2 rounded-md hover:bg-gray-300">Cancelar</a>
+            {{ form.submit(class="bg-slate-800 text-white px-4 py-2 rounded-md hover:bg-slate-900 cursor-pointer") }}
+        </div>
+    </form>
+</div>
+{% endblock %}

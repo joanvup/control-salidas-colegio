@@ -1,0 +1,55 @@
+{% extends "layouts/base.html" %}
+
+{% block content %}
+<div class="bg-white p-6 md:p-8 rounded-lg shadow-md max-w-2xl mx-auto">
+    <h1 class="text-2xl font-bold mb-6">{{ title }}</h1>
+    
+    <form method="POST" enctype="multipart/form-data" novalidate>
+        {{ form.hidden_tag() }}
+        <div class="space-y-4">
+            <div>
+                {{ form.id.label(class="block text-sm font-medium text-gray-700") }}
+                {{ form.id(class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-slate-500 focus:border-slate-500") }}
+                {% for error in form.id.errors %}
+                <p class="text-red-500 text-xs mt-1">{{ error }}</p>
+                {% endfor %}
+            </div>
+            <div>
+                {{ form.name.label(class="block text-sm font-medium text-gray-700") }}
+                {{ form.name(class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-slate-500 focus:border-slate-500") }}
+                {% for error in form.name.errors %}
+                <p class="text-red-500 text-xs mt-1">{{ error }}</p>
+                {% endfor %}
+            </div>
+            <div>
+                {{ form.course.label(class="block text-sm font-medium text-gray-700") }}
+                {{ form.course(class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-slate-500 focus:border-slate-500") }}
+                {% for error in form.course.errors %}
+                <p class="text-red-500 text-xs mt-1">{{ error }}</p>
+                {% endfor %}
+            </div>
+            <div class="flex items-center">
+                {{ form.authorized_to_leave(class="h-4 w-4 text-slate-600 focus:ring-slate-500 border-gray-300 rounded") }}
+                {{ form.authorized_to_leave.label(class="ml-2 block text-sm text-gray-900") }}
+            </div>
+            <div>
+                {{ form.photo.label(class="block text-sm font-medium text-gray-700") }}
+                {% if student and student.photo %}
+                <div class="my-2">
+                    <img src="{{ url_for('static', filename='uploads/photos/' + student.photo) }}" class="h-24 w-24 rounded-md object-cover">
+                    <p class="text-xs text-gray-500 mt-1">Foto actual. Cargar una nueva la reemplazará.</p>
+                </div>
+                {% endif %}
+                {{ form.photo(class="mt-1 block w-full text-sm text-gray-900 border border-gray-300 rounded-lg cursor-pointer bg-gray-50 focus:outline-none") }}
+                {% for error in form.photo.errors %}
+                <p class="text-red-500 text-xs mt-1">{{ error }}</p>
+                {% endfor %}
+            </div>
+        </div>
+        <div class="mt-6 flex items-center justify-end space-x-4">
+            <a href="{{ url_for('management.list_students') }}" class="bg-gray-200 text-gray-800 px-4 py-2 rounded-md hover:bg-gray-300">Cancelar</a>
+            {{ form.submit(class="bg-slate-800 text-white px-4 py-2 rounded-md hover:bg-slate-900 cursor-pointer") }}
+        </div>
+    </form>
+</div>
+{% endblock %}

@@ -1,0 +1,31 @@
+{% extends "layouts/base.html" %}
+
+{% block content %}
+<div class="bg-white p-6 md:p-8 rounded-lg shadow-md max-w-lg mx-auto">
+    <h1 class="text-2xl font-bold mb-6">{{ title }}</h1>
+    
+    <form method="POST" novalidate>
+        {{ form.hidden_tag() }}
+        <div class="space-y-4">
+            <div>
+                {{ form.name.label(class="block text-sm font-medium text-gray-700") }}
+                {{ form.name(class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-slate-500 focus:border-slate-500") }}
+                {% for error in form.name.errors %}
+                <p class="text-red-500 text-xs mt-1">{{ error }}</p>
+                {% endfor %}
+            </div>
+            <div>
+                {{ form.status.label(class="block text-sm font-medium text-gray-700") }}
+                {{ form.status(class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-slate-500 focus:border-slate-500") }}
+                 {% for error in form.status.errors %}
+                <p class="text-red-500 text-xs mt-1">{{ error }}</p>
+                {% endfor %}
+            </div>
+        </div>
+        <div class="mt-6 flex items-center justify-end space-x-4">
+            <a href="{{ url_for('management.list_doors') }}" class="bg-gray-200 text-gray-800 px-4 py-2 rounded-md hover:bg-gray-300">Cancelar</a>
+            {{ form.submit(class="bg-slate-800 text-white px-4 py-2 rounded-md hover:bg-slate-900 cursor-pointer") }}
+        </div>
+    </form>
+</div>
+{% endblock %}

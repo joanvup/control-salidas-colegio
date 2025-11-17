@@ -1,0 +1,76 @@
+{% extends "layouts/base.html" %}
+
+{% block content %}
+<div class="bg-white p-6 md:p-8 rounded-lg shadow-md">
+    <h1 class="text-2xl font-bold mb-4">{{ title }}</h1>
+
+    <!-- Formulario de Filtro -->
+    <form id="filter-form" method="POST" class="mb-6 bg-gray-50 p-4 rounded-md border border-gray-200 flex flex-col md:flex-row items-center gap-4">
+        <div class="w-full md:w-auto">
+            <label for="start_date" class="block text-sm font-medium text-gray-700">Fecha de Inicio</label>
+            <input type="date" id="start_date" name="start_date" value="{{ start_date }}" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50">
+        </div>
+        <div class="w-full md:w-auto">
+            <label for="end_date" class="block text-sm font-medium text-gray-700">Fecha de Fin</label>
+            <input type="date" id="end_date" name="end_date" value="{{ end_date }}" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50">
+        </div>
+        <div class="flex items-end h-full w-full md:w-auto">
+            <button type="submit" class="w-full justify-center bg-slate-800 text-white px-4 py-2 rounded-md hover:bg-slate-900 mt-1 md:mt-0">
+                Filtrar
+            </button>
+        </div>
+    </form>
+    
+    <!-- Botones de Exportación -->
+    <div class="mb-6 flex gap-4">
+        <a id="export-csv-btn" href="{{ url_for('main.export_csv', start_date=start_date, end_date=end_date) }}" class="bg-green-600 text-white px-4 py-2 rounded-md hover:bg-green-700 text-sm font-medium">
+            Exportar a CSV
+        </a>
+        <a id="export-pdf-btn" href="{{ url_for('main.export_pdf', start_date=start_date, end_date=end_date) }}" class="bg-red-600 text-white px-4 py-2 rounded-md hover:bg-red-700 text-sm font-medium">
+            Exportar a PDF
+        </a>
+    </div>
+
+    <!-- Tabla de Resultados con Cabeceras Clicables -->
+    <div class="overflow-x-auto">
+        <table class="min-w-full bg-white">
+            <thead class="bg-gray-200">
+                <tr>
+                    {% macro sortable_header(column_key, column_name) %}
+                        {% set new_direction = 'asc' if sort_by == column_key and direction == 'desc' else 'desc' %}
+                        <th class="py-3 px-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                            <a href="{{ url_for('main.reports', sort_by=column_key, direction=new_direction, start_date=start_date, end_date=end_date) }}" class="hover:text-gray-800">
+                                {{ column_name }}
+                                {% if sort_by == column_key %}
+                                    {{ '▼' if direction == 'desc' else '▲' }}
+                                {% endif %}
+                            </a>
+                        </th>
+                    {% endmacro %}
+                    
+                    {{ sortable_header('timestamp', 'Fecha y Hora') }}
+                    {{ sortable_header('student', 'Estudiante') }}
+                    {{ sortable_header('course', 'Curso') }}
+                    {{ sortable_header('door', 'Puerta') }}
+                    {{ sortable_header('operator', 'Operador') }}
+                </tr>
+            </thead>
+            <tbody class="divide-y divide-gray-200">
+                {% for log in logs %}
+                <tr>
+                    <td class="py-3 px-4 whitespace-nowrap">{{ log.local_timestamp.strftime('%Y-%m-%d %I:%M %p') }}</td>
+                    <td class="py-3 px-4 whitespace-nowrap">{{ log.student.name }}</td>
+                    <td class="py-3 px-4 whitespace-nowrap">{{ log.student.course }}</td>
+                    <td class="py-3 px-4 whitespace-nowrap">{{ log.door.name }}</td>
+                    <td class="py-3 px-4 whitespace-nowrap">{{ log.operator.username }}</td>
+                </tr>
+                {% else %}
+                <tr>
+                    <td colspan="5" class="text-center py-4">No hay registros en el rango de fechas seleccionado.</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+{% endblock %}

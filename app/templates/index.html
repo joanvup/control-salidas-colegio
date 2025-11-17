@@ -1,0 +1,125 @@
+{% extends "layouts/base.html" %}
+
+{% block content %}
+<div class="space-y-6">
+    <!-- Fila de Tarjetas de Resumen -->
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+        <div class="bg-white p-6 rounded-lg shadow-md flex items-center">
+            <div class="bg-blue-500 text-white rounded-full h-12 w-12 flex items-center justify-center">
+                <!-- Icono -->
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" /></svg>
+            </div>
+            <div class="ml-4">
+                <p class="text-sm text-gray-500">Total Estudiantes</p>
+                <p class="text-2xl font-bold">{{ total_students }}</p>
+            </div>
+        </div>
+        <div class="bg-white p-6 rounded-lg shadow-md flex items-center">
+            <div class="bg-green-500 text-white rounded-full h-12 w-12 flex items-center justify-center">
+                <!-- Icono -->
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" /></svg>
+            </div>
+            <div class="ml-4">
+                <p class="text-sm text-gray-500">Salidas Registradas (Hoy)</p>
+                <p class="text-2xl font-bold">{{ total_exits_today }}</p>
+            </div>
+        </div>
+        <div class="bg-white p-6 rounded-lg shadow-md">
+            <p class="text-sm text-gray-500 mb-2">Salidas por Puerta (Hoy)</p>
+            {% for door_name, count in exits_by_door_today %}
+            <div class="flex justify-between items-center text-sm">
+                <p class="font-medium">{{ door_name }}</p>
+                <p class="font-bold">{{ count }}</p>
+            </div>
+            {% else %}
+            <p class="text-sm text-gray-400">Sin salidas registradas.</p>
+            {% endfor %}
+        </div>
+    </div>
+
+    <!-- Fila de Gráficas -->
+    <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        <div class="bg-white p-6 rounded-lg shadow-md">
+            <h3 class="text-lg font-medium mb-4">Salidas en los Últimos 7 Días</h3>
+            <canvas id="dailyExitsChart"></canvas>
+        </div>
+        <div class="bg-white p-6 rounded-lg shadow-md">
+            <h3 class="text-lg font-medium mb-4">Salidas por Curso (Hoy)</h3>
+            <canvas id="courseExitsChart"></canvas>
+        </div>
+    </div>
+
+</div>
+
+<!-- Incluir Chart.js y el plugin de datalabels desde CDN -->
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels@2.0.0"></script>
+
+<script>
+    // Registrar el plugin globalmente para que esté disponible en todos los gráficos
+    Chart.register(ChartDataLabels);
+
+    document.addEventListener('DOMContentLoaded', function() {
+        // Datos de los gráficos desde Flask
+        const chartData = {{ chart_data | tojson }};
+
+        // Gráfico 1: Salidas Diarias (sin cambios)
+        const ctxDaily = document.getElementById('dailyExitsChart').getContext('2d');
+        new Chart(ctxDaily, {
+            type: 'bar',
+            data: {
+                labels: chartData.days.labels,
+                datasets: [{
+                    label: 'Salidas Registradas',
+                    data: chartData.days.data,
+                    backgroundColor: 'rgba(54, 162, 235, 0.6)',
+                    borderColor: 'rgba(54, 162, 235, 1)',
+                    borderWidth: 1
+                }]
+            },
+            options: { scales: { y: { beginAtZero: true, ticks: { precision: 0 } } }, responsive: true }
+        });
+
+        // Gráfico 2: Salidas por Curso (CON CAMBIOS)
+        const ctxCourse = document.getElementById('courseExitsChart').getContext('2d');
+        new Chart(ctxCourse, {
+            type: 'pie',
+            data: {
+                labels: chartData.courses.labels,
+                datasets: [{
+                    label: 'Salidas por Curso',
+                    data: chartData.courses.data,
+                    backgroundColor: [
+                        'rgba(255, 99, 132, 0.7)', 'rgba(54, 162, 235, 0.7)', 'rgba(255, 206, 86, 0.7)',
+                        'rgba(75, 192, 192, 0.7)', 'rgba(153, 102, 255, 0.7)', 'rgba(255, 159, 64, 0.7)'
+                    ]
+                }]
+            },
+            options: { 
+                responsive: true,
+                plugins: {
+                    legend: {
+                        position: 'top',
+                    },
+                    // Configuración del plugin de datalabels
+                    datalabels: {
+                        formatter: (value, ctx) => {
+                            let sum = 0;
+                            let dataArr = ctx.chart.data.datasets[0].data;
+                            dataArr.map(data => {
+                                sum += data;
+                            });
+                            let percentage = (value*100 / sum).toFixed(1) + '%';
+                            return percentage;
+                        },
+                        color: '#fff',
+                        font: {
+                            weight: 'bold'
+                        }
+                    }
+                }
+            }
+        });
+    });
+</script>
+{% endblock %}
