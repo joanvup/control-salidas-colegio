@@ -1,0 +1,39 @@
+# --- Entorno Virtual ---
+# Ignorar la carpeta del entorno virtual de Python
+venv/
+.venv/
+
+# --- Archivos de Entorno (¡Contiene Secretos!) ---
+# Ignorar el archivo que contiene las variables de entorno y contraseñas
+.env
+
+# --- Carpetas de Datos de la Aplicación ---
+# Ignorar la carpeta con los archivos subidos por el usuario (fotos)
+app/static/uploads/
+
+# Ignorar la carpeta de instancia de Flask (puede contener la BD SQLite)
+instance/
+
+# Ignorar la carpeta de archivos temporales (ZIPs, etc.)
+temp/
+
+# --- Base de Datos Local ---
+# Ignorar cualquier archivo de base de datos SQLite
+school_exit_control.db
+*.db
+*.sqlite3
+
+# --- Cache y Bytecode de Python ---
+# Ignorar archivos de bytecode compilado y carpetas de caché
+*.pyc
+__pycache__/
+
+# --- Configuración de IDEs y Editores ---
+# Ignorar carpetas de configuración de Visual Studio Code y PyCharm
+.vscode/
+.idea/
+
+# --- Archivos Generados por el Sistema Operativo ---
+# Ignorar archivos de sistema de macOS y Windows
+.DS_Store
+Thumbs.db
