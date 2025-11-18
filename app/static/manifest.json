@@ -1,6 +1,6 @@
 {
   "name": "Control de Salidas Colegio",
-  "short_name": "Salidas",
+  "short_name": "Control Salidas",
   "description": "Aplicación para el control de salidas peatonales del colegio.",
   "start_url": "/index",
   "display": "standalone",
