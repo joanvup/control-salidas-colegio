@@ -42,6 +42,9 @@ def create_app(config_class=Config):
     from app import commands
     commands.register_commands(app)
 
+    # --- REGISTRAR NUEVO BLUEPRINT DE ARCHIVOS ESTÁTICOS ---
+    from app.routes.static_files import bp as static_files_bp
+    app.register_blueprint(static_files_bp)
 
     return app
 
