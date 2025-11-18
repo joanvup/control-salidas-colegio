@@ -13,8 +13,11 @@
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div class="flex items-center justify-between h-16">
                 <div class="flex items-center">
-                    <a href="{{ url_for('main.index') }}" class="flex-shrink-0">
-                        <span class="font-bold text-xl ml-2">Control Salidas</span>
+                    <a href="{{ url_for('main.index') }}" class="flex items-center flex-shrink-0">
+                        <!-- Logo pequeño en la barra de navegación -->
+                        <!-- CAMBIO AQUÍ: de h-8 a h-6 -->
+                        <img class="h-12 w-auto mr-2" src="{{ url_for('static', filename='img/logo.png') }}" alt="Logo de la App">
+                        <span class="font-bold text-xl">Control Salidas</span>
                     </a>
                 </div>
                 <div class="hidden md:block">
