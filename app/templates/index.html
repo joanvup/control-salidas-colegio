@@ -14,22 +14,23 @@
                 <p class="text-2xl font-bold">{{ total_students }}</p>
             </div>
         </div>
+        <!-- Tarjeta Salidas Registradas (Clicable) -->
         <div class="bg-white p-6 rounded-lg shadow-md flex items-center">
             <div class="bg-green-500 text-white rounded-full h-12 w-12 flex items-center justify-center">
-                <!-- Icono -->
                 <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" /></svg>
             </div>
             <div class="ml-4">
                 <p class="text-sm text-gray-500">Salidas Registradas (Hoy)</p>
-                <p class="text-2xl font-bold">{{ total_exits_today }}</p>
+                <a href="#" class="text-2xl font-bold hover:text-blue-600 dashboard-link" data-filter-type="all" data-filter-name="Todas las Puertas">{{ total_exits_today }}</a>
             </div>
         </div>
+        <!-- Tarjeta Salidas por Puerta (Clicable) -->
         <div class="bg-white p-6 rounded-lg shadow-md">
             <p class="text-sm text-gray-500 mb-2">Salidas por Puerta (Hoy)</p>
-            {% for door_name, count in exits_by_door_today %}
+            {% for door_id, door_name, count in exits_by_door_today %}
             <div class="flex justify-between items-center text-sm">
                 <p class="font-medium">{{ door_name }}</p>
-                <p class="font-bold">{{ count }}</p>
+                <a href="#" class="font-bold hover:text-blue-600 dashboard-link" data-filter-type="door" data-filter-value="{{ door_id }}" data-filter-name="{{ door_name }}">{{ count }}</a>
             </div>
             {% else %}
             <p class="text-sm text-gray-400">Sin salidas registradas.</p>
@@ -50,12 +51,83 @@
     </div>
 
 </div>
-
+<!-- Modal para mostrar el detalle de salidas -->
+<div id="details-modal" class="hidden fixed z-10 inset-0 overflow-y-auto" aria-labelledby="modal-title" role="dialog" aria-modal="true">
+    <div class="flex items-center justify-center min-h-screen pt-4 px-4 pb-20 text-center sm:block sm:p-0">
+        <div id="modal-overlay" class="fixed inset-0 bg-gray-500 bg-opacity-75 transition-opacity" aria-hidden="true"></div>
+        <span class="hidden sm:inline-block sm:align-middle sm:h-screen" aria-hidden="true">&#8203;</span>
+        <div class="inline-block align-bottom bg-white rounded-lg text-left overflow-hidden shadow-xl transform transition-all sm:my-8 sm:align-middle sm:max-w-lg sm:w-full">
+            <div class="bg-white px-4 pt-5 pb-4 sm:p-6 sm:pb-4">
+                <div class="flex justify-between items-start">
+                    <h3 class="text-lg leading-6 font-medium text-gray-900" id="modal-title">Detalle de Salidas</h3>
+                    <button id="close-modal-btn" class="text-gray-400 hover:text-gray-600">&times;</button>
+                </div>
+                <div class="mt-4 max-h-96 overflow-y-auto" id="modal-content">
+                    <!-- Contenido dinámico aquí -->
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
 <!-- Incluir Chart.js y el plugin de datalabels desde CDN -->
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels@2.0.0"></script>
 
 <script>
+    // --- Lógica del Modal ---
+    const todaysExits = {{ todays_exits_details | tojson }};
+    const modal = document.getElementById('details-modal');
+    const modalTitle = document.getElementById('modal-title');
+    const modalContent = document.getElementById('modal-content');
+    const closeModalBtn = document.getElementById('close-modal-btn');
+    const modalOverlay = document.getElementById('modal-overlay');
+
+    document.querySelectorAll('.dashboard-link').forEach(link => {
+        link.addEventListener('click', function(event) {
+            event.preventDefault();
+            const filterType = this.dataset.filterType;
+            const filterValue = this.dataset.filterValue;
+            const filterName = this.dataset.filterName;
+
+            let filteredExits = [];
+            if (filterType === 'all') {
+                filteredExits = todaysExits;
+                modalTitle.innerText = `Detalle de Salidas de Hoy (${filterName})`;
+            } else if (filterType === 'door') {
+                filteredExits = todaysExits.filter(exit => exit.door_id == filterValue);
+                modalTitle.innerText = `Detalle de Salidas por: ${filterName}`;
+            }
+
+            let contentHtml = '<div class="space-y-3">';
+            if (filteredExits.length > 0) {
+                filteredExits.forEach(exit => {
+                    contentHtml += `
+                        <div class="flex items-center p-2 border-b">
+                            <img src="${exit.student_photo_url}" class="h-12 w-12 rounded-full object-cover mr-4">
+                            <div class="flex-grow">
+                                <p class="font-semibold text-gray-800">${exit.student_name}</p>
+                                <p class="text-sm text-gray-500">${exit.student_course}</p>
+                            </div>
+                            <div class="text-sm text-gray-600">${exit.timestamp}</div>
+                        </div>
+                    `;
+                });
+            } else {
+                contentHtml += '<p class="text-gray-500">No hay registros para mostrar.</p>';
+            }
+            contentHtml += '</div>';
+            
+            modalContent.innerHTML = contentHtml;
+            modal.classList.remove('hidden');
+        });
+    });
+
+    function hideModal() {
+        modal.classList.add('hidden');
+    }
+    closeModalBtn.addEventListener('click', hideModal);
+    modalOverlay.addEventListener('click', hideModal);
+    
     // Registrar el plugin globalmente para que esté disponible en todos los gráficos
     Chart.register(ChartDataLabels);
 

@@ -19,50 +19,51 @@ bp = Blueprint('main', __name__)
 @bp.route('/index')
 @login_required
 def index():
-    """Ruta del Dashboard principal con consultas corregidas para MySQL usando offset UTC."""
+    """Ruta del Dashboard principal con datos detallados para el modal."""
     
     now_co = datetime.now(colombia_tz)
     today_start = now_co.replace(hour=0, minute=0, second=0, microsecond=0)
     today_end = now_co.replace(hour=23, minute=59, second=59, microsecond=999999)
     seven_days_ago_start = (now_co - timedelta(days=6)).replace(hour=0, minute=0, second=0, microsecond=0)
 
-    # 1. Tarjetas de resumen (sin cambios)
+    # 1. Tarjetas de resumen
     total_students = db.session.query(func.count(Student.id)).scalar()
     total_exits_today = ExitLog.query.filter(ExitLog.timestamp.between(today_start, today_end)).count()
-    exits_by_door_today = db.session.query(Door.name, func.count(ExitLog.id))\
+    
+    # MODIFICACIÓN: Ahora seleccionamos también el ID de la puerta
+    exits_by_door_today = db.session.query(Door.id, Door.name, func.count(ExitLog.id))\
         .join(ExitLog)\
         .filter(ExitLog.timestamp.between(today_start, today_end))\
-        .group_by(Door.name).all()
+        .group_by(Door.id, Door.name).all()
 
-    # --- 2. CONSULTA MODIFICADA PARA USAR OFFSET UTC '-05:00' ---
+    # --- NUEVA CONSULTA: Obtener detalles de todas las salidas de hoy ---
+    todays_exits_details_query = ExitLog.query.options(
+        joinedload(ExitLog.student)
+    ).filter(ExitLog.timestamp.between(today_start, today_end)).order_by(ExitLog.timestamp.desc()).all()
+    
+    # Convertimos los objetos a un formato simple para JavaScript
+    todays_exits_list = [
+        {
+            "student_name": log.student.name,
+            "student_course": log.student.course,
+            "student_photo_url": f"/static/uploads/photos/{log.student.photo}" if log.student.photo else "/static/img/avatar.png",
+            "door_id": log.door_id,
+            "timestamp": log.local_timestamp.strftime('%I:%M %p')
+        } for log in todays_exits_details_query
+    ]
+
+    # ... (El resto de la lógica para las gráficas no cambia) ...
     colombia_timezone_offset = '-05:00'
     date_in_colombia = func.date(func.convert_tz(ExitLog.timestamp, '+00:00', colombia_timezone_offset))
-
-    exits_by_day_query = db.session.query(
-            date_in_colombia, 
-            func.count(ExitLog.id)
-        )\
-        .filter(ExitLog.timestamp >= seven_days_ago_start)\
-        .group_by(date_in_colombia)\
-        .order_by(date_in_colombia).all()
-
-    # La lógica para rellenar los datos del gráfico no cambia
-    # El resultado de la consulta ya no debería contener None
+    exits_by_day_query = db.session.query(date_in_colombia, func.count(ExitLog.id)).filter(ExitLog.timestamp >= seven_days_ago_start).group_by(date_in_colombia).order_by(date_in_colombia).all()
     daily_exits_dict = {date_obj.strftime("%Y-%m-%d"): count for date_obj, count in exits_by_day_query}
     chart_labels_days = [(seven_days_ago_start.date() + timedelta(days=i)).strftime("%Y-%m-%d") for i in range(7)]
     chart_data_days = [daily_exits_dict.get(day, 0) for day in chart_labels_days]
-
-    # 3 y 4. El resto de las consultas no necesitan cambios
-    exits_by_course_today_query = db.session.query(Student.course, func.count(ExitLog.id))\
-        .join(Student)\
-        .filter(ExitLog.timestamp.between(today_start, today_end))\
-        .group_by(Student.course).all()
-    
+    exits_by_course_today_query = db.session.query(Student.course, func.count(ExitLog.id)).join(Student).filter(ExitLog.timestamp.between(today_start, today_end)).group_by(Student.course).all()
     chart_labels_courses = [course for course, count in exits_by_course_today_query]
     chart_data_courses = [count for course, count in exits_by_course_today_query]
-
-    chart_labels_doors = [door for door, count in exits_by_door_today]
-    chart_data_doors = [count for door, count in exits_by_door_today]
+    chart_labels_doors = [door_name for door_id, door_name, count in exits_by_door_today]
+    chart_data_doors = [count for door_id, door_name, count in exits_by_door_today]
 
     return render_template(
         'index.html', 
@@ -70,13 +71,13 @@ def index():
         total_students=total_students,
         total_exits_today=total_exits_today,
         exits_by_door_today=exits_by_door_today,
+        todays_exits_details=todays_exits_list, # Pasamos la nueva lista a la plantilla
         chart_data={
             'days': {'labels': chart_labels_days, 'data': chart_data_days},
             'courses': {'labels': chart_labels_courses, 'data': chart_data_courses},
             'doors': {'labels': chart_labels_doors, 'data': chart_data_doors}
         }
     )
-
 # El resto del archivo no necesita cambios.
 @bp.route('/reports', methods=['GET', 'POST'])
 @login_required
