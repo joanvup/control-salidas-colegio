@@ -1,4 +1,4 @@
-const CACHE_NAME = 'control-salidas-cache-v2';
+const CACHE_NAME = 'control-salidas-cache-v3';
 const urlsToCache = [
   '/',
   '/index',
